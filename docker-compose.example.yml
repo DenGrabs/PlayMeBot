@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    container_name: playmebot
+    volumes:
+      - .:/usr/src/app
+    environment:
+      - TOKEN={TOKEN}
+    restart: unless-stopped  
