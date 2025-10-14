@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  playmebot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: playmebot
+    restart: unless-stopped
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+    env_file:
+      - .env
+    networks:
+      - bot_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  bot_network:
+    driver: bridge
+

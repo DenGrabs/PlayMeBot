@@ -1,0 +1,24 @@
+{
+  "name": "playmebot",
+  "version": "1.0.0",
+  "description": "Simple Telegram bot using Grammy.js",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "grammy"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "grammy": "^1.36.3",
+    "dotenv": "^16.4.5",
+    "@grammyjs/auto-retry": "^2.0.2"
+  }
+}
+
