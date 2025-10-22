@@ -5,6 +5,7 @@ import { autoRetry } from '@grammyjs/auto-retry';
 dotenv.config();
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
+const MINI_APP_LINK = process.env.MINI_APP_LINK;
 
 if (!BOT_TOKEN) {
   console.error('Error: BOT_TOKEN is not defined in environment variables');
@@ -34,7 +35,7 @@ bot.command('start', async (ctx) => {
                '✨ Здесь каждая героиня — это пламя... А тебе предстоит решить: обжечься или разжечь его еще сильнее? ❤️‍🔥', 
       reply_markup: {
         inline_keyboard: [
-          [{ text: '🔥 Играть', url: 'https://t.me/PlayMeTgBot/PlayMeHiz' }],
+          [{ text: '🔥 Играть', url: MINI_APP_LINK }],
         ],
       },
       parse_mode: 'HTML',
