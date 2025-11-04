@@ -8,12 +8,18 @@ dotenv.config();
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const MINI_APP_LINK = process.env.MINI_APP_LINK;
 const PORT = process.env.PORT || 3030;
-const WEBHOOK_PATH = process.env.WEBHOOK_PATH;
+const WEBHOOK_PATH = process.env.WEBHOOK_PATH || `/webhook/${BOT_TOKEN}`;
 
 if (!BOT_TOKEN) {
   console.error('Error: BOT_TOKEN is not defined in environment variables');
   process.exit(1);
 }
+
+console.log('🔧 Configuration:');
+console.log(`  PORT: ${PORT}`);
+console.log(`  WEBHOOK_PATH: ${WEBHOOK_PATH}`);
+console.log(`  MINI_APP_LINK: ${MINI_APP_LINK || 'NOT SET'}`);
+console.log('');
 
 const bot = new Bot(BOT_TOKEN);
 
@@ -27,31 +33,59 @@ bot.api.setMyCommands([
 ]);
 
 bot.command('start', async (ctx) => {
-  if (!ctx.hasChatType(["private"])) {
-    return;
-  }
-  await ctx.replyWithPhoto(
-    new InputFile('./assets/Img2.png'),
-    {
-      caption: '🔥OnlyHot\n\n'+
-               'OnlyHot — это не просто игра, это огненный коктейль из страсти, красоты и дерзких искушений! 💋\n\n' +
-               '✨ Здесь каждая героиня — это пламя... А тебе предстоит решить: обжечься или разжечь его еще сильнее? ❤️‍🔥', 
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: '🔥 Играть', url: MINI_APP_LINK }],
-        ],
-      },
-      parse_mode: 'HTML',
+  try {
+    console.log(`👤 Processing /start command from user ${ctx.from?.id}`);
+    
+    if (!ctx.hasChatType(["private"])) {
+      console.log(`⚠️  Ignoring /start from non-private chat`);
+      return;
     }
-  );
+    
+    await ctx.replyWithPhoto(
+      new InputFile('./assets/Img2.png'),
+      {
+        caption: '🔥OnlyHot\n\n'+
+                 'OnlyHot — это не просто игра, это огненный коктейль из страсти, красоты и дерзких искушений! 💋\n\n' +
+                 '✨ Здесь каждая героиня — это пламя... А тебе предстоит решить: обжечься или разжечь его еще сильнее? ❤️‍🔥', 
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🔥 Играть', url: MINI_APP_LINK }],
+          ],
+        },
+        parse_mode: 'HTML',
+      }
+    );
+    
+    console.log(`✅ Successfully sent /start response to user ${ctx.from?.id}`);
+  } catch (error) {
+    console.error(`❌ Error handling /start command:`, error);
+    // Try to send a simple text message as fallback
+    try {
+      await ctx.reply('Привет! 👋 К сожалению, произошла ошибка при загрузке изображения.');
+    } catch (fallbackError) {
+      console.error(`❌ Fallback message also failed:`, fallbackError);
+    }
+  }
 });
 
 bot.on('message', async (ctx) => {
-  await ctx.reply('👋 Hi! Use /start to begin.');
+  try {
+    console.log(`💬 Processing general message from user ${ctx.from?.id}: ${ctx.message.text}`);
+    await ctx.reply('👋 Hi! Use /start to begin.');
+    console.log(`✅ Successfully sent response to user ${ctx.from?.id}`);
+  } catch (error) {
+    console.error(`❌ Error handling message:`, error);
+  }
 });
 
 bot.catch((err) => {
-  console.error('Error occurred:', err);
+  const ctx = err.ctx;
+  console.error('\n' + '❌'.repeat(20));
+  console.error('❌ Grammy Error Handler Triggered:');
+  console.error(`Update ID: ${ctx.update.update_id}`);
+  console.error(`Error: ${err.error.message}`);
+  console.error(`Stack: ${err.error.stack}`);
+  console.error('❌'.repeat(20) + '\n');
 });
 
 // Initialize Express app
@@ -68,44 +102,68 @@ app.get('/health', (req, res) => {
 app.use(express.json());
 
 // Logging middleware for webhook requests
-app.post(WEBHOOK_PATH, (req, res, next) => {
-  const update = req.body;
-  const timestamp = new Date().toISOString();
-  
-  // Log basic update info
-  console.log(`\n${'='.repeat(60)}`);
-  console.log(`[${timestamp}] 📨 Webhook request received`);
-  console.log(`Update ID: ${update.update_id || 'N/A'}`);
-  
-  // Log message details if present
-  if (update.message) {
-    const msg = update.message;
-    console.log(`Type: message`);
-    console.log(`From: ${msg.from?.username || msg.from?.first_name || 'Unknown'} (ID: ${msg.from?.id})`);
-    console.log(`Chat: ${msg.chat?.type} (ID: ${msg.chat?.id})`);
-    console.log(`Text: ${msg.text || msg.caption || '[non-text message]'}`);
+app.post(WEBHOOK_PATH, 
+  (req, res, next) => {
+    const update = req.body;
+    const timestamp = new Date().toISOString();
+    
+    // Log basic update info
+    console.log(`\n${'='.repeat(60)}`);
+    console.log(`[${timestamp}] 📨 Webhook request received`);
+    console.log(`Update ID: ${update.update_id || 'N/A'}`);
+    
+    // Log message details if present
+    if (update.message) {
+      const msg = update.message;
+      console.log(`Type: message`);
+      console.log(`From: ${msg.from?.username || msg.from?.first_name || 'Unknown'} (ID: ${msg.from?.id})`);
+      console.log(`Chat: ${msg.chat?.type} (ID: ${msg.chat?.id})`);
+      console.log(`Text: ${msg.text || msg.caption || '[non-text message]'}`);
+    }
+    
+    // Log callback query details if present
+    if (update.callback_query) {
+      const cb = update.callback_query;
+      console.log(`Type: callback_query`);
+      console.log(`From: ${cb.from?.username || cb.from?.first_name || 'Unknown'} (ID: ${cb.from?.id})`);
+      console.log(`Data: ${cb.data}`);
+    }
+    
+    // Log other update types
+    if (update.edited_message) {
+      console.log(`Type: edited_message`);
+    }
+    if (update.channel_post) {
+      console.log(`Type: channel_post`);
+    }
+    
+    console.log(`${'='.repeat(60)}\n`);
+    console.log(`🔄 Passing to Grammy webhookCallback...`);
+    
+    next();
+  },
+  async (req, res, next) => {
+    try {
+      console.log(`📥 Grammy is processing update ${req.body.update_id}...`);
+      await webhookCallback(bot, 'express')(req, res, next);
+      console.log(`📤 Grammy finished processing update ${req.body.update_id}`);
+    } catch (error) {
+      console.error(`❌ Error in webhookCallback:`, error);
+      if (!res.headersSent) {
+        res.status(500).send('Internal Server Error');
+      }
+    }
   }
-  
-  // Log callback query details if present
-  if (update.callback_query) {
-    const cb = update.callback_query;
-    console.log(`Type: callback_query`);
-    console.log(`From: ${cb.from?.username || cb.from?.first_name || 'Unknown'} (ID: ${cb.from?.id})`);
-    console.log(`Data: ${cb.data}`);
-  }
-  
-  // Log other update types
-  if (update.edited_message) {
-    console.log(`Type: edited_message`);
-  }
-  if (update.channel_post) {
-    console.log(`Type: channel_post`);
-  }
-  
-  console.log(`${'='.repeat(60)}\n`);
-  
-  next();
-}, webhookCallback(bot, 'express'));
+);
+
+// Test endpoint to verify routing
+app.get('/test', (req, res) => {
+  res.json({ 
+    message: 'Bot is running!',
+    webhookPath: WEBHOOK_PATH,
+    port: PORT
+  });
+});
 
 // Start server (without setting webhook - handled by external service)
 const startServer = async () => {
@@ -113,6 +171,7 @@ const startServer = async () => {
     const botInfo = await bot.api.getMe();
     console.log(`✅ Bot @${botInfo.username} is ready to receive webhook requests!`);
     console.log(`📍 Webhook endpoint: POST http://localhost:${PORT}${WEBHOOK_PATH}`);
+    console.log(`🧪 Test endpoint: GET http://localhost:${PORT}/test`);
     console.log(`ℹ️  Webhook is managed by external service`);
     
     app.listen(PORT, '0.0.0.0', () => {
