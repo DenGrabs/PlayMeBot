@@ -7,8 +7,13 @@ services:
       dockerfile: Dockerfile
     container_name: playmebot
     restart: unless-stopped
+    ports:
+      - "${PORT}:${PORT}"
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
+      - WEBHOOK_URL=${WEBHOOK_URL}
+      - MINI_APP_LINK=${MINI_APP_LINK}
+      - PORT=${PORT}
     env_file:
       - .env
     networks:

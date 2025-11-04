@@ -21,6 +21,9 @@ RUN addgroup -g 1001 -S nodejs && \
 # Switch to non-root user
 USER nodejs
 
+# Expose port for webhook
+EXPOSE 3030
+
 # Start the bot
 CMD ["npm", "start"]
 
