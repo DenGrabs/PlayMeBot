@@ -181,7 +181,10 @@ app.get('/test', (req, res) => {
 // Start server (without setting webhook - handled by external service)
 const startServer = async () => {
   try {
-    const botInfo = await bot.api.getMe();
+    // Initialize the bot (required for handleUpdate to work)
+    await bot.init();
+    const botInfo = bot.botInfo;
+    
     console.log(`✅ Bot @${botInfo.username} is ready to receive webhook requests!`);
     console.log(`📍 Webhook endpoint: POST http://localhost:${PORT}${WEBHOOK_PATH}`);
     console.log(`🧪 Test endpoint: GET http://localhost:${PORT}/test`);
