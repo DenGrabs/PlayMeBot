@@ -9,7 +9,6 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 const MINI_APP_LINK = process.env.MINI_APP_LINK;
 const PORT = process.env.PORT || 3030;
 const WEBHOOK_PATH = process.env.WEBHOOK_PATH;
-const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
 
 if (!BOT_TOKEN) {
   console.error('Error: BOT_TOKEN is not defined in environment variables');
@@ -67,7 +66,46 @@ app.get('/health', (req, res) => {
 // Note: Webhook is set by external service (api.staging.onlyhot.ai)
 // This bot just receives proxied requests
 app.use(express.json());
-app.post(WEBHOOK_PATH, webhookCallback(bot, 'express', {secretToken: WEBHOOK_SECRET}));
+
+// Logging middleware for webhook requests
+app.post(WEBHOOK_PATH, (req, res, next) => {
+  const update = req.body;
+  const timestamp = new Date().toISOString();
+  
+  // Log basic update info
+  console.log(`\n${'='.repeat(60)}`);
+  console.log(`[${timestamp}] 📨 Webhook request received`);
+  console.log(`Update ID: ${update.update_id || 'N/A'}`);
+  
+  // Log message details if present
+  if (update.message) {
+    const msg = update.message;
+    console.log(`Type: message`);
+    console.log(`From: ${msg.from?.username || msg.from?.first_name || 'Unknown'} (ID: ${msg.from?.id})`);
+    console.log(`Chat: ${msg.chat?.type} (ID: ${msg.chat?.id})`);
+    console.log(`Text: ${msg.text || msg.caption || '[non-text message]'}`);
+  }
+  
+  // Log callback query details if present
+  if (update.callback_query) {
+    const cb = update.callback_query;
+    console.log(`Type: callback_query`);
+    console.log(`From: ${cb.from?.username || cb.from?.first_name || 'Unknown'} (ID: ${cb.from?.id})`);
+    console.log(`Data: ${cb.data}`);
+  }
+  
+  // Log other update types
+  if (update.edited_message) {
+    console.log(`Type: edited_message`);
+  }
+  if (update.channel_post) {
+    console.log(`Type: channel_post`);
+  }
+  
+  console.log(`${'='.repeat(60)}\n`);
+  
+  next();
+}, webhookCallback(bot, 'express'));
 
 // Start server (without setting webhook - handled by external service)
 const startServer = async () => {
