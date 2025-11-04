@@ -28,6 +28,19 @@ bot.api.config.use(autoRetry({
   maxDelaySeconds: 60,
 }));
 
+// Log all updates that Grammy receives
+bot.use(async (ctx, next) => {
+  console.log(`\n🎯 ===== GRAMMY MIDDLEWARE START =====`);
+  console.log(`🎯 Update ID:`, ctx.update.update_id);
+  console.log(`🎯 Update keys:`, Object.keys(ctx.update));
+  console.log(`🎯 Has message:`, !!ctx.message);
+  console.log(`🎯 Message text:`, ctx.message?.text);
+  console.log(`🎯 Chat type:`, ctx.chat?.type);
+  console.log(`🎯 ===== GRAMMY MIDDLEWARE END =====\n`);
+  await next();
+  console.log(`🎯 After next() - handlers completed`);
+});
+
 bot.api.setMyCommands([
   { command: 'start', description: '🔥 Начать игру' }
 ]);
@@ -78,6 +91,11 @@ bot.on('message', async (ctx) => {
   }
 });
 
+// Catch-all to see if we reach any handler
+bot.on('message:text', (ctx) => {
+  console.log(`📝 Catch-all handler reached for text: "${ctx.message.text}"`);
+});
+
 bot.catch((err) => {
   const ctx = err.ctx;
   console.error('\n' + '❌'.repeat(20));
@@ -100,6 +118,9 @@ app.get('/health', (req, res) => {
 // Note: Webhook is set by external service (api.staging.onlyhot.ai)
 // This bot just receives proxied requests
 app.use(express.json());
+
+// Create webhook handler once
+const handleWebhook = webhookCallback(bot, 'express');
 
 // Logging middleware for webhook requests
 app.post(WEBHOOK_PATH, 
@@ -142,18 +163,7 @@ app.post(WEBHOOK_PATH,
     
     next();
   },
-  async (req, res, next) => {
-    try {
-      console.log(`📥 Grammy is processing update ${req.body.update_id}...`);
-      await webhookCallback(bot, 'express')(req, res, next);
-      console.log(`📤 Grammy finished processing update ${req.body.update_id}`);
-    } catch (error) {
-      console.error(`❌ Error in webhookCallback:`, error);
-      if (!res.headersSent) {
-        res.status(500).send('Internal Server Error');
-      }
-    }
-  }
+  handleWebhook
 );
 
 // Test endpoint to verify routing
