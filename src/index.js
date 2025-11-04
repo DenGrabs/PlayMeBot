@@ -119,15 +119,12 @@ app.get('/health', (req, res) => {
 // This bot just receives proxied requests
 app.use(express.json());
 
-// Create webhook handler once
-const handleWebhook = webhookCallback(bot, 'express');
-
 // Logging middleware for webhook requests
-app.post(WEBHOOK_PATH, 
-  (req, res, next) => {
-    const update = req.body;
-    const timestamp = new Date().toISOString();
-    
+app.post(WEBHOOK_PATH, async (req, res) => {
+  const update = req.body;
+  const timestamp = new Date().toISOString();
+  
+  try {
     // Log basic update info
     console.log(`\n${'='.repeat(60)}`);
     console.log(`[${timestamp}] 📨 Webhook request received`);
@@ -159,12 +156,18 @@ app.post(WEBHOOK_PATH,
     }
     
     console.log(`${'='.repeat(60)}\n`);
-    console.log(`🔄 Passing to Grammy webhookCallback...`);
+    console.log(`🔄 Passing to bot.handleUpdate()...`);
     
-    next();
-  },
-  handleWebhook
-);
+    // Directly handle the update with the bot
+    await bot.handleUpdate(update);
+    
+    console.log(`✅ Update ${update.update_id} processed successfully`);
+    res.status(200).send('OK');
+  } catch (error) {
+    console.error(`❌ Error processing update ${update.update_id}:`, error);
+    res.status(200).send('OK'); // Still return 200 to prevent retries
+  }
+});
 
 // Test endpoint to verify routing
 app.get('/test', (req, res) => {
