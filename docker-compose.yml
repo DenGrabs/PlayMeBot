@@ -9,9 +9,9 @@ services:
       - "${PORT}:${PORT}"
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
-      - WEBHOOK_URL=${WEBHOOK_URL}
       - MINI_APP_LINK=${MINI_APP_LINK}
       - PORT=${PORT}
+      - WEBHOOK_PATH=${WEBHOOK_PATH}
     env_file:
       - .env
     networks:

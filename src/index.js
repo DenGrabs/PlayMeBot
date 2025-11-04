@@ -7,16 +7,11 @@ dotenv.config();
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const MINI_APP_LINK = process.env.MINI_APP_LINK;
-const WEBHOOK_URL = process.env.WEBHOOK_URL;
 const PORT = process.env.PORT || 3030;
+const WEBHOOK_PATH = process.env.WEBHOOK_PATH;
 
 if (!BOT_TOKEN) {
   console.error('Error: BOT_TOKEN is not defined in environment variables');
-  process.exit(1);
-}
-
-if (!WEBHOOK_URL) {
-  console.error('Error: WEBHOOK_URL is not defined in environment variables');
   process.exit(1);
 }
 
@@ -68,27 +63,22 @@ app.get('/health', (req, res) => {
 });
 
 // Webhook endpoint for Telegram
+// Note: Webhook is set by external service (api.staging.onlyhot.ai)
+// This bot just receives proxied requests
 app.use(express.json());
-app.post(`/webhook/${BOT_TOKEN}`, webhookCallback(bot, 'express'));
+app.post(WEBHOOK_PATH, webhookCallback(bot, 'express'));
 
-// Start server and set webhook
+// Start server (without setting webhook - handled by external service)
 const startServer = async () => {
   try {
-    // Set webhook
-    await bot.api.setWebhook(`${WEBHOOK_URL}/webhook/${BOT_TOKEN}`, {
-      drop_pending_updates: true,
-    });
-    
-    const webhookInfo = await bot.api.getWebhookInfo();
-    console.log('✅ Webhook set successfully!');
-    console.log(`📍 Webhook URL: ${webhookInfo.url}`);
-    console.log(`🔄 Pending updates: ${webhookInfo.pending_update_count}`);
-    
     const botInfo = await bot.api.getMe();
-    console.log(`✅ Bot @${botInfo.username} is up and running with webhooks!`);
+    console.log(`✅ Bot @${botInfo.username} is ready to receive webhook requests!`);
+    console.log(`📍 Webhook endpoint: POST http://localhost:${PORT}${WEBHOOK_PATH}`);
+    console.log(`ℹ️  Webhook is managed by external service`);
     
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Server is running on port ${PORT}`);
+      console.log(`💡 Your API service should forward Telegram updates to this endpoint`);
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);
