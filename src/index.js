@@ -9,6 +9,7 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 const MINI_APP_LINK = process.env.MINI_APP_LINK;
 const PORT = process.env.PORT || 3030;
 const WEBHOOK_PATH = process.env.WEBHOOK_PATH;
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
 
 if (!BOT_TOKEN) {
   console.error('Error: BOT_TOKEN is not defined in environment variables');
@@ -66,7 +67,7 @@ app.get('/health', (req, res) => {
 // Note: Webhook is set by external service (api.staging.onlyhot.ai)
 // This bot just receives proxied requests
 app.use(express.json());
-app.post(WEBHOOK_PATH, webhookCallback(bot, 'express'));
+app.post(WEBHOOK_PATH, webhookCallback(bot, 'express', {secretToken: WEBHOOK_SECRET}));
 
 // Start server (without setting webhook - handled by external service)
 const startServer = async () => {
