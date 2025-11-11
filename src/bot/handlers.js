@@ -8,13 +8,14 @@ bot.command('start', async (ctx) => {
     return;
   }
   
+  const language = ctx.from.language_code === 'ru' ? 'ru' : 'en';
   try {
     await ctx.replyWithPhoto(
       new InputFile('./assets/Img2.png'),
       {
-        caption: messages.start.ru, 
+        caption: messages.start[language], 
         reply_markup: {
-          inline_keyboard: buttons.start.ru,
+          inline_keyboard: buttons.start[language],
         },
         parse_mode: 'HTML',
       }
