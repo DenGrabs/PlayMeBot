@@ -15,7 +15,7 @@ bot.command('start', async (ctx) => {
       {
         caption: messages.start[language], 
         reply_markup: {
-          inline_keyboard: buttons.start[language],
+          inline_keyboard: [buttons.start[language]],
         },
         parse_mode: 'HTML',
       }
