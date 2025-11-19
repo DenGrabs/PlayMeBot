@@ -5,8 +5,6 @@ services:
       dockerfile: Dockerfile
     image: playmebot:latest
     restart: unless-stopped
-    env_file:
-      - .env
     ports:
       - "${PORT}:${PORT}"
     healthcheck:
@@ -15,8 +13,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
-    environment:
-      - NODE_ENV=production
     networks:
       - bot_network
     logging:
