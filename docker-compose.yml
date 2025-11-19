@@ -6,9 +6,9 @@ services:
     image: playmebot:latest
     restart: unless-stopped
     ports:
-      - "${PORT}:${PORT}"
+      - "${PORT:-3030}:${PORT:-3030}"
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:${PORT}/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:${PORT:-3030}/health"]
       interval: 30s
       timeout: 5s
       retries: 3
