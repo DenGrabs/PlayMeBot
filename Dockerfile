@@ -8,11 +8,11 @@ RUN npm i
 
 COPY . .
 
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001 && \
-    chown -R nodejs:nodejs /app
+RUN addgroup -g 1001 -S playmeuser && \
+    adduser -S playmeuser -u 1001 && \
+    chown -R playmeuser:playmeuser /app
 
-USER nodejs
+USER playmeuser
 
 EXPOSE ${PORT}
 
