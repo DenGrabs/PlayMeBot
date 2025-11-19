@@ -15,35 +15,35 @@ export const config = {
 
 export function validateConfig() {
   if (!config.botToken) {
-    throw new Error('BOT_TOKEN is not defined in environment variables');
+    console.warn('BOT_TOKEN is not defined in environment variables');
   }
   
   if (!config.miniAppLink) {
-    console.warn('⚠️  MINI_APP_LINK is not set');
+    console.warn('MINI_APP_LINK is not defined in environment variables');
   }
   
   if (!config.webhookBaseUrl) {
-    console.warn('⚠️  WEBHOOK_BASE_URL is not set, webhook auto-setup will be skipped');
+    console.warn('WEBHOOK_BASE_URL is not defined in environment variables');
   }
 
   if (!config.port) {
-    throw new Error('PORT is not defined in environment variables');
+    console.warn('PORT is not defined in environment variables');
   }
 
   if (!config.env) {
-    throw new Error('APP_ENV is not defined in environment variables');
+    console.warn('APP_ENV is not defined in environment variables');
   }
 
   if (!config.webhookPath) {
-    throw new Error('WEBHOOK_PATH is not defined in environment variables');
+    console.warn('WEBHOOK_PATH is not defined in environment variables');
   }
 
   if (!config.webhookSecretToken) {
-    throw new Error('WEBHOOK_SECRET_TOKEN is not defined in environment variables');
+    console.warn('WEBHOOK_SECRET_TOKEN is not defined in environment variables');
   }
 
   if (!config.webhookDropPendingUpdates) {
-    throw new Error('WEBHOOK_DROP_PENDING_UPDATES is not defined in environment variables');
+    console.warn('WEBHOOK_DROP_PENDING_UPDATES is not defined in environment variables');
   }
 }
 

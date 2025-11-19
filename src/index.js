@@ -7,6 +7,7 @@ import { setupWebhook } from './bot/webhook.js';
 async function start() {
   try {
     validateConfig();
+    console.log('Config:', config);
     
     const botInfo = await initializeBot();
     console.log(`✅ Bot @${botInfo.username} initialized`);
