@@ -4,9 +4,6 @@ import './bot/handlers.js';
 import { createApp } from './server/app.js';
 import { setupWebhook } from './bot/webhook.js';
 
-console.log('Config:', config);
-console.log('Environment variables:', process.env);
-
 async function start() {
   try {
     validateConfig();

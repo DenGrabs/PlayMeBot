@@ -8,10 +8,12 @@ export async function setupWebhook() {
 
   const url = `${config.webhookBaseUrl}${config.webhookPath}`;
 
-  await bot.api.setWebhook(url, {
+  const webhookResponse = await bot.api.setWebhook(url, {
     secret_token: config.webhookSecretToken || undefined,
     drop_pending_updates: config.webhookDropPendingUpdates,
   });
+
+  console.log('Webhook response:', webhookResponse);
 
   return { configured: true, url };
 }
