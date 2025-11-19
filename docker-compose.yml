@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     image: playmebot:latest
     restart: unless-stopped
+    env_file:
+      - ${ENV_FILE:-.env}
     ports:
       - "${PORT:-3030}:${PORT:-3030}"
     healthcheck:
